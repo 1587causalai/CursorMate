@@ -1,3 +1,53 @@
+#!/usr/bin/env python3
+"""
+CursorFocus 主程序 (focus.py)
+
+这是 CursorFocus 项目的核心执行程序，负责项目的监控、分析和文档生成。
+与 setup.py（配置管理工具）配合使用，形成完整的项目监控系统。
+
+核心功能：
+1. 项目监控
+   - 多线程监控多个项目
+   - 实时更新项目状态
+   - 自动检测文件变化
+
+2. 文档生成
+   - 生成和更新 Focus.md 文档
+   - 生成项目规则文件 (.cursorrules)
+   - 实时更新项目分析结果
+
+3. 自动更新
+   - 检查程序版本更新
+   - 自动下载并应用更新
+   - 支持更新确认
+
+工作流程：
+1. 启动时检查程序更新
+2. 加载项目配置信息
+3. 为每个项目生成初始文档
+4. 启动多线程监控各个项目
+5. 定期更新项目文档和分析结果
+
+配置项说明：
+- update_interval: 更新间隔（秒）
+- max_depth: 目录扫描深度
+- ignored_directories: 忽略的目录
+- ignored_files: 忽略的文件
+- binary_extensions: 二进制文件扩展名
+- file_length_standards: 各类文件的标准长度
+- file_length_thresholds: 文件长度警告阈值
+- project_types: 支持的项目类型定义
+
+使用方式：
+python focus.py
+
+注意事项：
+1. 需要先通过 setup.py 配置要监控的项目
+2. 支持多项目同时监控
+3. 可以通过 Ctrl+C 安全退出
+4. 自动保存所有分析结果
+"""
+
 import os
 import time
 from datetime import datetime
@@ -10,7 +60,19 @@ import logging
 from auto_updater import AutoUpdater
 
 def get_default_config():
-    """Get default configuration with parent directory as project path."""
+    """
+    获取默认配置
+    
+    返回一个包含默认配置的字典，包括：
+    - 项目路径（默认为父目录）
+    - 更新间隔（60秒）
+    - 扫描深度（3层）
+    - 忽略的目录和文件
+    - 二进制文件扩展名
+    - 各类文件的标准长度
+    - 文件长度警告阈值
+    - 支持的项目类型定义
+    """
     return {
         'project_path': os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
         'update_interval': 60,
@@ -112,7 +174,20 @@ def get_default_config():
     }
 
 def retry_generate_rules(project_path, project_name, max_retries=5):
-    """Retry generating rules file with user confirmation."""
+    """
+    重试生成项目规则文件
+    
+    参数：
+    - project_path: 项目路径
+    - project_name: 项目名称
+    - max_retries: 最大重试次数（默认5次）
+    
+    功能：
+    1. 分析项目结构
+    2. 让用户选择规则文件格式（JSON/Markdown）
+    3. 生成规则文件
+    4. 失败时提供重试机制
+    """
     retries = 0
     while retries < max_retries:
         try:
@@ -150,7 +225,19 @@ def retry_generate_rules(project_path, project_name, max_retries=5):
                 raise
 
 def setup_cursor_focus(project_path, project_name=None):
-    """Set up CursorFocus for a project by generating necessary files."""
+    """
+    为项目设置 CursorFocus
+    
+    参数：
+    - project_path: 项目路径
+    - project_name: 项目名称（可选）
+    
+    功能：
+    1. 检查是否存在规则文件
+    2. 生成/更新规则文件
+    3. 生成初始的 Focus.md 文档
+    4. 使用默认配置初始化项目
+    """
     try:
         # Check for existing rules file
         rules_file = os.path.join(project_path, '.cursorrules')
@@ -177,7 +264,19 @@ def setup_cursor_focus(project_path, project_name=None):
         raise
 
 def monitor_project(project_config, global_config):
-    """Monitor a single project."""
+    """
+    监控单个项目
+    
+    参数：
+    - project_config: 项目特定配置
+    - global_config: 全局配置
+    
+    功能：
+    1. 合并项目配置和全局配置
+    2. 启动项目文件监控
+    3. 定期更新项目文档
+    4. 检测文档变化并保存
+    """
     project_path = project_config['project_path']
     project_name = project_config['name']
     print(f"👀 {project_name}")
@@ -214,7 +313,22 @@ def monitor_project(project_config, global_config):
         last_update = current_time
 
 def main():
-    """Main function to monitor multiple projects."""
+    """
+    主函数 - 程序入口
+    
+    功能流程：
+    1. 配置日志系统
+    2. 检查程序更新
+    3. 加载配置文件
+    4. 设置默认项目（如果没有配置）
+    5. 为每个项目执行初始化设置
+    6. 启动多线程监控所有项目
+    7. 保持运行直到用户中断
+    
+    错误处理：
+    - 捕获键盘中断，实现优雅退出
+    - 处理配置加载和项目监控中的异常
+    """
     logging.basicConfig(
         level=logging.WARNING,
         format='%(levelname)s: %(message)s'
