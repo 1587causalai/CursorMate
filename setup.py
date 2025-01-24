@@ -1,4 +1,51 @@
 #!/usr/bin/env python3
+"""
+CursorFocus 项目配置脚本 (setup.py)
+
+这是 CursorFocus 项目的配置管理脚本，主要用于管理和配置需要被监控的项目。
+
+核心功能：
+1. 项目管理
+   - 添加新项目到监控列表
+   - 移除已有项目
+   - 列出所有被监控的项目
+   - 自动扫描目录发现可监控的项目
+
+2. 配置文件管理
+   - 自动创建/加载配置文件 (config.json)
+   - 管理项目相关配置（更新间隔、扫描深度等）
+   - 维护忽略文件和目录列表
+
+命令行参数：
+--projects, -p : 指定要监控的项目路径
+--names, -n    : 为项目指定自定义名称
+--list, -l     : 列出所有已配置的项目
+--remove, -r   : 移除指定的项目（可通过名称或索引）
+--scan, -s     : 扫描指定目录（默认当前目录）寻找可监控的项目
+
+配置信息：
+- 项目配置包含：名称、路径、更新间隔、最大扫描深度
+- 默认更新间隔：60秒
+- 默认扫描深度：3层
+- 自动处理重名项目
+
+使用示例：
+1. 扫描当前目录：
+   python setup.py --scan
+2. 添加指定项目：
+   python setup.py --projects /path/to/project1 /path/to/project2
+3. 列出所有项目：
+   python setup.py --list
+4. 移除项目：
+   python setup.py --remove project_name
+
+注意事项：
+- 所有路径都会被转换为绝对路径
+- 项目名称会自动清理常见后缀（如 -main, -master 等）
+- 支持交互式确认重要操作
+- 配置文件自动保存在脚本所在目录
+"""
+
 import os
 import json
 import argparse
