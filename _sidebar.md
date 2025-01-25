@@ -5,3 +5,4 @@
 * Brainstorm 
   * [为什么要写 .cursorrules 文件？](brainstorm/WhatHowWhy_Cursorrules.md)
   * [Focus.md 与 .cursorrules 的分工定位](brainstorm/cursorrules_vs_focus.md)
+  * [个性化的 CursorFocus](brainstorm/me_proposal.md)
