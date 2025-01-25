@@ -2,3 +2,6 @@
 * [Focus实现原理](FOCUS_IMPLEMENTATION.md)
 * [cursorrules生成原理](CURSORRULES_IMPLEMENTATION.md)
 * [上下文构建示例](CONTEXT_BUILDING_EXAMPLE.md) 
+* Brainstorm 
+  * [为什么要写 .cursorrules 文件？](brainstorm/WhatHowWhy_Cursorrules.md)
+  * [Focus.md 与 .cursorrules 的分工定位](brainstorm/cursorrules_vs_focus.md)
