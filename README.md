@@ -21,3 +21,13 @@ CursorFocus 是一个自动化的项目监控和分析工具，它能够：
 - [Focus实现原理](FOCUS_IMPLEMENTATION.md) - 了解 Focus.md 是如何生成的
 - [cursorrules生成原理](CURSORRULES_IMPLEMENTATION.md) - 了解 .cursorrules 是如何生成的
 - [上下文构建示例](CONTEXT_BUILDING_EXAMPLE.md) - 通过具体示例了解上下文构建过程 
+
+
+
+## 灵魂拷问
+
+
+为什么要写 .cursorrules 文件？ 如何写好 .cursorrules 文件？ 写好这个文件有什么好处？够了吗？
+
+
+
