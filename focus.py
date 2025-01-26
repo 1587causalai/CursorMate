@@ -390,7 +390,9 @@ def main():
 
         try:
             while True:
-                time.sleep(60)  # 每60秒更新一次文档
+                # 使用配置中的更新间隔
+                update_interval = min([p.get('update_interval', 60) for p in config['projects']])
+                time.sleep(update_interval)
                 for project in config['projects']:
                     if os.path.exists(project['project_path']):
                         setup_cursor_focus(project['project_path'], project.get('name'))
