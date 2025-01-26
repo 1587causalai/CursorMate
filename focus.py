@@ -51,6 +51,7 @@ python focus.py
 import os
 import time
 from datetime import datetime
+from typing import Dict, List
 from config import load_config
 from content_generator import generate_focus_content
 from rules_analyzer import RulesAnalyzer
@@ -58,6 +59,7 @@ from rules_generator import RulesGenerator
 from rules_watcher import ProjectWatcherManager
 import logging
 from auto_updater import AutoUpdater
+from me_generator import generate_me_content
 
 def get_default_config():
     """
@@ -233,129 +235,77 @@ def setup_cursor_focus(project_path, project_name=None):
     - project_name: 项目名称（可选）
     
     功能：
-    1. 检查是否存在规则文件
-    2. 生成/更新规则文件
-    3. 生成初始的 Focus.md 文档
-    4. 使用默认配置初始化项目
+    1. 生成 Focus.md 文档
+    2. 生成 Me.md 文档
     """
     try:
-        # Check for existing rules file
-        rules_file = os.path.join(project_path, '.cursorrules')
-        
-        if os.path.exists(rules_file):
-            print(f"\nRules file exists for {project_name or 'project'}")
-            response = input("Update rules? (y/n): ").lower()
-            if response != 'y':
-                return
-        
-        # Generate/Update .cursorrules file with retry mechanism
-        rules_file = retry_generate_rules(project_path, project_name)
-
-        # Generate initial Focus.md with default config
-        focus_file = os.path.join(project_path, 'Focus.md')
+        # 使用默认配置
         default_config = get_default_config()
+        
+        # 生成 Focus.md
+        focus_file = os.path.join(project_path, 'Focus.md')
         content = generate_focus_content(project_path, default_config)
         with open(focus_file, 'w', encoding='utf-8') as f:
             f.write(content)
-        print(f"✓ {os.path.basename(focus_file)}")
+        print(f"✓ Generated {os.path.basename(focus_file)}")
+
+        # 生成 Me.md
+        me_file = os.path.join(project_path, 'Me.md')
+        me_content = generate_me_content(project_path, default_config)
+        with open(me_file, 'w', encoding='utf-8') as f:
+            f.write(me_content)
+        print(f"✓ Generated {os.path.basename(me_file)}")
 
     except Exception as e:
         print(f"❌ Setup error: {e}")
         raise
 
-def monitor_project(project_config, global_config):
-    """
-    监控单个项目
-    
-    参数：
-    - project_config: 项目特定配置
-    - global_config: 全局配置
-    
-    功能：
-    1. 合并项目配置和全局配置
-    2. 启动项目文件监控
-    3. 定期更新项目文档
-    4. 检测文档变化并保存
-    """
-    project_path = project_config['project_path']
-    project_name = project_config['name']
-    print(f"👀 {project_name}")
-    
-    # Merge project config with global config
-    config = {**global_config, **project_config}
-    
-    focus_file = os.path.join(project_path, 'Focus.md')
-    last_content = None
-    last_update = 0
-
-    # Start rules watcher for this project
-    watcher = ProjectWatcherManager()
-    watcher.add_project(project_path, project_name)
-
-    while True:
-        current_time = time.time()
-        
-        if current_time - last_update < config.get('update_interval', 60):
-            time.sleep(1)
-            continue
+def monitor_project(project_path: str, config: Dict):
+    """监控项目变化并更新文档"""
+    try:
+        # 生成 Focus.md
+        focus_content = generate_focus_content(project_path, config)
+        with open(os.path.join(project_path, 'Focus.md'), 'w', encoding='utf-8') as f:
+            f.write(focus_content)
             
-        content = generate_focus_content(project_path, config)
+        # 生成 Me.md
+        me_content = generate_me_content(project_path, config)
+        with open(os.path.join(project_path, 'Me.md'), 'w', encoding='utf-8') as f:
+            f.write(me_content)
+            
+        print(f"✓ Generated Focus.md and Me.md at {datetime.now()}")
+    except Exception as e:
+        logging.error(f"Error generating documents: {e}")
+
+def test_me_generation():
+    """测试 Me.md 生成功能"""
+    try:
+        project_path = os.getcwd()  # 使用当前目录
+        config = get_default_config()
         
-        if content != last_content:
-            try:
-                with open(focus_file, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                last_content = content
-                print(f"✓ {project_name} ({datetime.now().strftime('%H:%M')})")
-            except Exception as e:
-                print(f"❌ {project_name}: {e}")
-        
-        last_update = current_time
+        # 生成 Me.md
+        me_content = generate_me_content(project_path, config)
+        with open('Me.md', 'w', encoding='utf-8') as f:
+            f.write(me_content)
+            
+        print(f"✓ Generated Me.md successfully")
+    except Exception as e:
+        print(f"❌ Error generating Me.md: {e}")
 
 def main():
     """
     主函数 - 程序入口
     
     功能流程：
-    1. 配置日志系统
-    2. 检查程序更新
-    3. 加载配置文件
-    4. 设置默认项目（如果没有配置）
-    5. 为每个项目执行初始化设置
-    6. 启动多线程监控所有项目
-    7. 保持运行直到用户中断
-    
-    错误处理：
-    - 捕获键盘中断，实现优雅退出
-    - 处理配置加载和项目监控中的异常
+    1. 加载配置文件
+    2. 设置默认项目（如果没有配置）
+    3. 为每个项目生成文档
+    4. 启动监控
     """
     logging.basicConfig(
         level=logging.WARNING,
         format='%(levelname)s: %(message)s'
     )
-
-    # Check updates
-    print("\n🔄 Checking updates...")
-    updater = AutoUpdater()
-    update_info = updater.check_for_updates()
-    
-    if update_info:
-        print(f"📦 Update available: {update_info['message']}")
-        print(f"🕒 Date: {update_info['date']}")
-        print(f"👤 Author: {update_info['author']}")
-        try:
-            if input("Update now? (y/n): ").lower() == 'y':
-                print("⏳ Downloading...")
-                if updater.update(update_info):
-                    print("✅ Updated! Please restart")
-                    return
-                else:
-                    print("❌ Update failed")
-        except KeyboardInterrupt:
-            print("\n👋 Update canceled")
-            pass
-    else:
-        print("✓ Latest version")
 
     config = load_config()
     if not config:
@@ -387,7 +337,7 @@ def main():
             if os.path.exists(project['project_path']):
                 thread = Thread(
                     target=monitor_project,
-                    args=(project, config),
+                    args=(project['project_path'], project),
                     daemon=True
                 )
                 thread.start()
