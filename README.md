@@ -1,14 +1,8 @@
-## [All rights belong to RenjiYuusei please do not steal the source code or modify the source code without the author's consent. Please respect the author](https://github.com/RenjiYuusei/CursorMate)
+# CursorMate
 
-## CursorMate
+A lightweight tool that maintains a focused view of your project structure and environment. CursorMate automatically tracks your project files, functions, and environment variables, updating every 60 seconds to keep you informed of changes. Detailed information on [link](https://1587causalai.github.io/CursorMate/#/)
 
-A lightweight tool that maintains a focused view of your project structure and environment. CursorMate automatically tracks your project files, functions, and environment variables, updating every 60 seconds to keep you informed of changes.
 
-Check out our [SHOWCASE.md](SHOWCASE.md) for detailed examples and real-world use cases!
-
-## Discord
-
-Join our Discord server to discuss features, ask questions: [Discord](https://discord.gg/N6FBdRZ8sw)
 
 ## Features
 
