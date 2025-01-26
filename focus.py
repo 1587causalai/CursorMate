@@ -313,7 +313,7 @@ def monitor_project(project_path: str, config: Dict):
         os.makedirs(os.path.dirname(me_file), exist_ok=True)
         with open(me_file, 'w', encoding='utf-8') as f:
             f.write(me_content)
-            
+                
         print(f"✓ Generated documents at {datetime.now()}")
     except Exception as e:
         logging.error(f"Error generating documents: {e}")
@@ -344,63 +344,61 @@ def main():
     主函数 - 程序入口
     
     功能流程：
-    1. 加载配置文件
-    2. 设置默认项目（如果没有配置）
-    3. 为每个项目生成文档
-    4. 启动监控
+    1. 检查更新
+    2. 加载配置文件
+    3. 设置默认项目（如果没有配置）
+    4. 生成文档并启动监控
     """
-    logging.basicConfig(
-        level=logging.WARNING,
-        format='%(levelname)s: %(message)s'
-    )
-
-    config = load_config()
-    if not config:
-        print("No config.json found")
-        config = get_default_config()
-
-    if 'projects' not in config:
-        config['projects'] = [{
-            'name': 'Default Project',
-            'project_path': config['project_path'],
-            'update_interval': config.get('update_interval', 6000),
-            'max_depth': config.get('max_depth', 3)
-        }]
-
-    from threading import Thread
-    threads = []
-    
     try:
-        # Setup projects
+        # 检查更新
+        print("\n🔄 Checking updates...")
+        updater = AutoUpdater()
+        if updater.check_for_updates():
+            if updater.should_update():
+                updater.update()
+                print("✓ Updated to latest version")
+                return
+        else:
+            print("✓ Latest version")
+
+        # 加载配置
+        config = load_config()
+        if not config:
+            config = get_default_config()
+
+        if 'projects' not in config:
+            config['projects'] = [{
+                'name': 'Default Project',
+                'project_path': os.getcwd(),
+                'update_interval': config.get('update_interval', 60),
+                'max_depth': config.get('max_depth', 3)
+            }]
+
+        # 为每个项目生成文档并启动监控
         for project in config['projects']:
             if os.path.exists(project['project_path']):
-                setup_cursor_focus(project['project_path'], project['name'])
+                setup_cursor_focus(project['project_path'], project.get('name'))
             else:
                 print(f"⚠️ Not found: {project['project_path']}")
-                continue
 
-        # Start monitoring
+        # 启动监控
+        print(f"\n📝 Monitoring {len(config['projects'])} projects (Ctrl+C to stop)")
+        watcher = ProjectWatcherManager()
         for project in config['projects']:
             if os.path.exists(project['project_path']):
-                thread = Thread(
-                    target=monitor_project,
-                    args=(project['project_path'], project),
-                    daemon=True
-                )
-                thread.start()
-                threads.append(thread)
+                watcher.add_project(project['project_path'], project.get('name'))
 
-        if not threads:
-            print("❌ No projects to monitor")
-            return
+        try:
+            while True:
+                time.sleep(60)  # 每60秒更新一次文档
+                for project in config['projects']:
+                    if os.path.exists(project['project_path']):
+                        setup_cursor_focus(project['project_path'], project.get('name'))
+                print(f"✓ Generated documents at {datetime.now()}")
+        except KeyboardInterrupt:
+            watcher.stop_all()
+            print("\n👋 Bye!")
 
-        print(f"\n📝 Monitoring {len(threads)} projects (Ctrl+C to stop)")
-        
-        while True:
-            time.sleep(1)
-            
-    except KeyboardInterrupt:
-        print("\n👋 Bye!")
     except Exception as e:
         print(f"\n❌ Error: {e}")
 

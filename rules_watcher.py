@@ -38,7 +38,7 @@ class RulesWatcher(FileSystemEventHandler):
             return False
             
         filename = os.path.basename(file_path)
-        focus_file = os.path.basename(self.config['file_paths']['focus'])
+        focus_file = os.path.basename(self.config.get('file_paths', {}).get('focus', 'Focus.md'))
         
         # List of files that should trigger an update
         trigger_files = [
@@ -64,11 +64,11 @@ class RulesWatcher(FileSystemEventHandler):
             project_info = detect_project_type(self.project_path)
             
             # 确保输出目录存在
-            output_dir = os.path.join(self.project_path, self.config['output_directory'])
+            output_dir = os.path.join(self.project_path, self.config.get('output_directory', '.me'))
             os.makedirs(output_dir, exist_ok=True)
             
             # Generate new rules
-            rules_file = os.path.join(self.project_path, self.config['file_paths']['rules'])
+            rules_file = os.path.join(self.project_path, self.config.get('file_paths', {}).get('rules', '.me/Rules.md'))
             os.makedirs(os.path.dirname(rules_file), exist_ok=True)
             self.rules_generator.generate_rules_file(project_info, rules_file)
             print(f"Updated {os.path.basename(rules_file)} for project {self.project_id} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -82,40 +82,50 @@ class RulesWatcher(FileSystemEventHandler):
         print(f"Auto-update of .cursorrules is now {status} for project {self.project_id}")
 
 class ProjectWatcherManager:
-    def __init__(self):
-        self.observers: Dict[str, Any] = {}
-        self.watchers: Dict[str, RulesWatcher] = {}
-
-    def add_project(self, project_path: str, project_id: str = None) -> str:
-        """Add a new project to watch.
-        
-        Args:
-            project_path: Path to the project directory
-            project_id: Optional unique identifier for the project. If not provided,
-                       the absolute path will be used as the ID.
-                       
-        Returns:
-            The project ID used for the watcher
-        """
-        if not os.path.exists(project_path):
-            raise ValueError(f"Project path does not exist: {project_path}")
+    def __init__(self, project_path: str = None, config: Dict = None):
+        self.observers = {}
+        self.watchers = {}
+        if project_path:
+            self.add_project(project_path)
             
-        project_id = project_id or os.path.abspath(project_path)
+    def add_project(self, project_path: str, project_id: str = None) -> str:
+        """
+        添加一个项目到监控列表
         
+        参数：
+        - project_path: 项目路径
+        - project_id: 项目ID（可选，默认使用路径的base name）
+        
+        返回：
+        - project_id: 项目ID
+        """
+        project_path = os.path.abspath(project_path)
+        if not project_id:
+            project_id = os.path.basename(project_path)
+            
         if project_id in self.observers:
             print(f"Project {project_id} is already being watched")
             return project_id
             
-        event_handler = RulesWatcher(project_path, project_id)
-        observer = Observer()
-        observer.schedule(event_handler, project_path, recursive=True)
-        observer.start()
-        
-        self.observers[project_id] = observer
-        self.watchers[project_id] = event_handler
-        
-        print(f"Started watching project {project_id}")
-        return project_id
+        try:
+            # 创建观察者和处理器
+            observer = Observer()
+            watcher = RulesWatcher(project_path, project_id)
+            
+            # 启动观察者
+            observer.schedule(watcher, project_path, recursive=True)
+            observer.start()
+            
+            # 保存观察者和处理器的引用
+            self.observers[project_id] = observer
+            self.watchers[project_id] = watcher
+            
+            print(f"Started watching project {project_id}")
+            return project_id
+            
+        except Exception as e:
+            print(f"Error watching project {project_id}: {e}")
+            raise
 
     def remove_project(self, project_id: str):
         """Stop watching a project."""
