@@ -1,8 +1,8 @@
-# CursorFocus .cursorrules 实现原理
+# CursorFocus Rules.md 实现原理
 
 ## 1. 概述
 
-`.cursorrules` 是 CursorFocus 项目的核心配置文件，它通过结合静态代码分析和 AI 能力，为项目生成智能化的编码规则和建议。本文档详细介绍其实现原理和技术细节。
+`Rules.md` 是 CursorFocus 项目的核心配置文件，它通过结合静态代码分析和 Gemini AI 能力，为项目生成智能化的编码规则和建议。本文档详细介绍其实现原理和技术细节。
 
 ## 2. 系统架构
 
@@ -80,7 +80,10 @@ PATTERNS = {
 
 #### 3.2.1 环境配置
 ```python
-# 初始化 Gemini AI
+# 初始化 Gemini AI (必需)
+if not os.environ.get("GEMINI_API_KEY"):
+    raise ValueError("GEMINI_API_KEY is required")
+    
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 model = genai.GenerativeModel(
     model_name="gemini-2.0-flash-exp",
@@ -117,32 +120,7 @@ Based on this analysis, create behavior rules for:
 
 ### 3.3 规则生成
 
-#### 3.3.1 JSON 格式
-```json
-{
-    "version": "1.0",
-    "project": {
-        "name": "项目名称",
-        "language": "编程语言",
-        "framework": "框架",
-        "type": "项目类型"
-    },
-    "ai_behavior": {
-        "code_generation": {
-            "style": {
-                "prefer": [],
-                "avoid": []
-            },
-            "error_handling": {
-                "prefer": [],
-                "avoid": []
-            }
-        }
-    }
-}
-```
-
-#### 3.3.2 Markdown 格式
+#### 3.3.1 规则格式
 ```markdown
 # Project Rules
 
@@ -163,11 +141,17 @@ Based on this analysis, create behavior rules for:
 - 避免模式 2
 ```
 
-## 4. 使用流程
+#### 3.3.2 降级机制
+当未配置 GEMINI_API_KEY 时，系统会：
+1. 使用预定义的规则模板
+2. 基于项目分析结果填充模板
+3. 生成基础的编码规范
+
+### 4. 使用流程
 
 ### 4.1 初始化
 ```bash
-# 设置环境变量
+# 设置必需的环境变量
 export GEMINI_API_KEY=your_api_key
 
 # 配置项目
@@ -180,10 +164,7 @@ python setup.py --scan
 generator = RulesGenerator(project_path)
 
 # 生成规则文件
-rules_file = generator.generate_rules_file(
-    project_info,
-    format='markdown'  # 或 'json'
-)
+rules_file = generator.generate_rules_file(project_info)
 ```
 
 ### 4.3 规则更新
@@ -211,6 +192,7 @@ rules_file = generator.generate_rules_file(
 ## 6. 注意事项
 
 1. **API 密钥管理**
+   - GEMINI_API_KEY 是必需的
    - 安全存储 API 密钥
    - 避免密钥泄露
    - 定期更新密钥

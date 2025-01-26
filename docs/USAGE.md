@@ -16,7 +16,17 @@ CursorFocus 是一个强大的项目监控和分析工具，它能够自动追�
 
 ### 1. 基础配置
 
-首先需要运行配置脚本来设置你要监控的项目：
+首先需要设置 GEMINI_API_KEY 环境变量:
+
+```bash
+# Linux/Mac
+export GEMINI_API_KEY=your_api_key
+
+# Windows
+set GEMINI_API_KEY=your_api_key
+```
+
+然后运行配置脚本来设置你要监控的项目：
 
 ```bash
 python setup.py --scan
@@ -66,8 +76,29 @@ python setup.py --remove all
 - `project_path`: 项目路径
 - `update_interval`: 更新间隔（默认60秒）
 - `max_depth`: 最大扫描深度（默认3层）
+- `output_directory`: 输出目录（默认 ".me"）
+- `file_paths`: 生成文件的路径配置
+  - `focus`: Focus.md 文件路径
+  - `me`: Me.md 文件路径
+  - `rules`: Rules.md 文件路径
 
-### 4. 高级用法
+### 4. 生成文件说明
+
+CursorFocus 会在每个项目的 `.me` 目录下生成三个文件：
+
+1. **Focus.md**
+   - 项目的焦点文档
+   - 包含项目结构、代码统计等信息
+
+2. **Me.md**
+   - 个人指标文档
+   - 记录个人的代码贡献和活动
+
+3. **Rules.md**
+   - 项目规则文档
+   - 包含编码规范和最佳实践
+
+### 5. 高级用法
 
 #### 自定义扫描
 ```bash
@@ -106,6 +137,13 @@ python setup.py --projects /path/1 /path/2 --names "Project1" "Project2"
    - 合理设置更新间隔，避免过于频繁的扫描
    - 适当设置扫描深度，避免扫描过多无关文件
 
+5. **API Key 配置**
+   - 必须配置 GEMINI_API_KEY 环境变量
+   - 用于生成智能的项目规则
+   - 如果未配置将无法生成规则文件
+
+![20250125171711](https://s2.loli.net/2025/01/25/vnS92ikp5A7uGb1.png)
+
 ## 常见问题
 
 1. **Q: 如何修改项目的更新间隔？**
@@ -134,6 +172,5 @@ python setup.py --projects /path/1 /path/2 --names "Project1" "Project2"
 3. **资源管理**
    - 定期清理不再需要监控的项目
    - 避免同时监控过多项目
-
 
 希望这个教程能帮助你更好地使用 CursorFocus！如果还有任何问题，随时查阅本文档或寻求帮助。 

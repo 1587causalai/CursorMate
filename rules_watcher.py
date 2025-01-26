@@ -5,6 +5,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from rules_generator import RulesGenerator
 from project_detector import detect_project_type
+from config import get_default_config
 
 class RulesWatcher(FileSystemEventHandler):
     def __init__(self, project_path: str, project_id: str):
@@ -14,6 +15,7 @@ class RulesWatcher(FileSystemEventHandler):
         self.last_update = 0
         self.update_delay = 5  # Seconds to wait before updating to avoid multiple updates
         self.auto_update = False  # Disable auto-update by default
+        self.config = get_default_config()  # 加载配置
 
     def on_modified(self, event):
         if event.is_directory or not self.auto_update:  # Skip if auto-update is disabled
@@ -36,10 +38,11 @@ class RulesWatcher(FileSystemEventHandler):
             return False
             
         filename = os.path.basename(file_path)
+        focus_file = os.path.basename(self.config['file_paths']['focus'])
         
         # List of files that should trigger an update
         trigger_files = [
-            'Focus.md',
+            focus_file,  # 使用配置中的Focus.md路径
             'package.json',
             'requirements.txt',
             'CMakeLists.txt',
@@ -60,11 +63,17 @@ class RulesWatcher(FileSystemEventHandler):
             # Re-detect project type
             project_info = detect_project_type(self.project_path)
             
+            # 确保输出目录存在
+            output_dir = os.path.join(self.project_path, self.config['output_directory'])
+            os.makedirs(output_dir, exist_ok=True)
+            
             # Generate new rules
-            self.rules_generator.generate_rules_file(project_info)
-            print(f"Updated .cursorrules for project {self.project_id} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            rules_file = os.path.join(self.project_path, self.config['file_paths']['rules'])
+            os.makedirs(os.path.dirname(rules_file), exist_ok=True)
+            self.rules_generator.generate_rules_file(project_info, rules_file)
+            print(f"Updated {os.path.basename(rules_file)} for project {self.project_id} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
         except Exception as e:
-            print(f"Error updating .cursorrules for project {self.project_id}: {e}")
+            print(f"Error updating rules file for project {self.project_id}: {e}")
 
     def set_auto_update(self, enabled: bool):
         """Enable or disable auto-update of .cursorrules."""

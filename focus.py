@@ -237,24 +237,57 @@ def setup_cursor_focus(project_path, project_name=None):
     功能：
     1. 生成 Focus.md 文档
     2. 生成 Me.md 文档
+    3. 生成 .cursorrules 文件
     """
     try:
-        # 使用默认配置
-        default_config = get_default_config()
+        # 加载配置
+        config = load_config()
+        project_config = None
+        
+        # 查找对应项目的配置
+        if config and 'projects' in config:
+            for proj in config['projects']:
+                if proj['project_path'] == project_path:
+                    project_config = proj
+                    break
+        
+        # 如果没有找到项目配置，使用默认配置
+        if not project_config:
+            project_config = get_default_config()
+        
+        # 确保输出目录存在
+        output_dir = os.path.join(project_path, project_config.get('output_directory', '.me'))
+        os.makedirs(output_dir, exist_ok=True)
         
         # 生成 Focus.md
-        focus_file = os.path.join(project_path, 'Focus.md')
-        content = generate_focus_content(project_path, default_config)
+        focus_file = os.path.join(project_path, project_config.get('file_paths', {}).get('focus', '.me/Focus.md'))
+        content = generate_focus_content(project_path, project_config)
+        os.makedirs(os.path.dirname(focus_file), exist_ok=True)
         with open(focus_file, 'w', encoding='utf-8') as f:
             f.write(content)
         print(f"✓ Generated {os.path.basename(focus_file)}")
 
         # 生成 Me.md
-        me_file = os.path.join(project_path, 'Me.md')
-        me_content = generate_me_content(project_path, default_config)
+        me_file = os.path.join(project_path, project_config.get('file_paths', {}).get('me', '.me/Me.md'))
+        me_content = generate_me_content(project_path, project_config)
+        os.makedirs(os.path.dirname(me_file), exist_ok=True)
         with open(me_file, 'w', encoding='utf-8') as f:
             f.write(me_content)
         print(f"✓ Generated {os.path.basename(me_file)}")
+
+        # 生成 .cursorrules
+        try:
+            rules_file = os.path.join(project_path, project_config.get('file_paths', {}).get('rules', '.me/.cursorrules'))
+            os.makedirs(os.path.dirname(rules_file), exist_ok=True)
+            
+            # 分析项目并生成规则
+            analyzer = RulesAnalyzer(project_path)
+            project_info = analyzer.analyze_project_for_rules()
+            rules_generator = RulesGenerator(project_path)
+            rules_generator.generate_rules_file(project_info, rules_file)
+            print(f"✓ Generated {os.path.basename(rules_file)}")
+        except Exception as e:
+            print(f"⚠️ Warning: Could not generate rules file: {e}")
 
     except Exception as e:
         print(f"❌ Setup error: {e}")
@@ -263,17 +296,25 @@ def setup_cursor_focus(project_path, project_name=None):
 def monitor_project(project_path: str, config: Dict):
     """监控项目变化并更新文档"""
     try:
+        # 确保输出目录存在
+        output_dir = os.path.join(project_path, config.get('output_directory', '.me'))
+        os.makedirs(output_dir, exist_ok=True)
+        
         # 生成 Focus.md
+        focus_file = os.path.join(project_path, config.get('file_paths', {}).get('focus', '.me/Focus.md'))
         focus_content = generate_focus_content(project_path, config)
-        with open(os.path.join(project_path, 'Focus.md'), 'w', encoding='utf-8') as f:
+        os.makedirs(os.path.dirname(focus_file), exist_ok=True)
+        with open(focus_file, 'w', encoding='utf-8') as f:
             f.write(focus_content)
             
         # 生成 Me.md
+        me_file = os.path.join(project_path, config.get('file_paths', {}).get('me', '.me/Me.md'))
         me_content = generate_me_content(project_path, config)
-        with open(os.path.join(project_path, 'Me.md'), 'w', encoding='utf-8') as f:
+        os.makedirs(os.path.dirname(me_file), exist_ok=True)
+        with open(me_file, 'w', encoding='utf-8') as f:
             f.write(me_content)
             
-        print(f"✓ Generated Focus.md and Me.md at {datetime.now()}")
+        print(f"✓ Generated documents at {datetime.now()}")
     except Exception as e:
         logging.error(f"Error generating documents: {e}")
 
@@ -283,12 +324,18 @@ def test_me_generation():
         project_path = os.getcwd()  # 使用当前目录
         config = get_default_config()
         
+        # 确保输出目录存在
+        output_dir = os.path.join(project_path, config['output_directory'])
+        os.makedirs(output_dir, exist_ok=True)
+        
         # 生成 Me.md
+        me_file = os.path.join(project_path, config['file_paths']['me'])
         me_content = generate_me_content(project_path, config)
-        with open('Me.md', 'w', encoding='utf-8') as f:
+        os.makedirs(os.path.dirname(me_file), exist_ok=True)
+        with open(me_file, 'w', encoding='utf-8') as f:
             f.write(me_content)
             
-        print(f"✓ Generated Me.md successfully")
+        print(f"✓ Generated {os.path.basename(me_file)} successfully")
     except Exception as e:
         print(f"❌ Error generating Me.md: {e}")
 
@@ -316,7 +363,7 @@ def main():
         config['projects'] = [{
             'name': 'Default Project',
             'project_path': config['project_path'],
-            'update_interval': config.get('update_interval', 60),
+            'update_interval': config.get('update_interval', 6000),
             'max_depth': config.get('max_depth', 3)
         }]
 

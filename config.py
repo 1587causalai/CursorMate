@@ -23,6 +23,12 @@ def get_default_config():
         "project_path": "",
         "update_interval": 60,
         "max_depth": 3,
+        "output_directory": ".me",
+        "file_paths": {
+            "focus": ".me/Focus.md",
+            "me": ".me/Me.md",
+            "rules": ".me/Rules.md"
+        },
         "ignored_directories": [
             "__pycache__",
             "node_modules",

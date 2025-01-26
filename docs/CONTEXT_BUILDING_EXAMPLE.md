@@ -139,7 +139,7 @@ coding_standards = {
 
 ## 2. 文档生成过程
 
-### 2.1 生成 .cursorrules
+### 2.1 生成 Rules.md
 
 ```python
 # 构建 Gemini AI 提示
@@ -159,7 +159,7 @@ prompt = f"""
 {code_patterns['components'][0]['content']}
 {code_patterns['hooks'][0]['content']}
 
-请生成一个 .cursorrules 文件，包含：
+请生成一个 Rules.md 文件，包含：
 1. 项目信息
 2. 编码规则
 3. 最佳实践
@@ -167,7 +167,7 @@ prompt = f"""
 """
 
 # Gemini AI 响应示例
-cursorrules_content = """
+rules_content = """
 # Project Rules
 
 ## Project Information

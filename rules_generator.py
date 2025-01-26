@@ -89,6 +89,7 @@ import google.generativeai as genai
 import re
 from rules_analyzer import RulesAnalyzer
 from dotenv import load_dotenv
+from config import get_default_config
 
 class RulesGenerator:
     # Common regex patterns
@@ -144,6 +145,7 @@ class RulesGenerator:
     def __init__(self, project_path: str):
         self.project_path = project_path
         self.analyzer = RulesAnalyzer(project_path)
+        self.config = get_default_config()  # 加载配置
         
         # Load environment variables from .env
         load_dotenv()
@@ -659,8 +661,8 @@ Do not include technical metrics in the description."""
             
         return markdown
 
-    def generate_rules_file(self, project_info: Dict[str, Any] = None, format: str = 'json') -> str:
-        """Generate the .cursorrules file based on project analysis and AI suggestions."""
+    def generate_rules_file(self, project_info: Dict[str, Any] = None, rules_file: str = None) -> str:
+        """Generate the .cursorrules file in markdown format."""
         try:
             # Use analyzer if no project_info provided
             if project_info is None:
@@ -669,38 +671,35 @@ Do not include technical metrics in the description."""
             # Analyze project structure
             project_structure = self._analyze_project_structure()
             
-            # Generate AI rules
-            ai_rules = self._generate_ai_rules(project_info)
+            # Create rules file path
+            if rules_file is None:
+                rules_file = os.path.join(self.project_path, self.config['file_paths']['rules'])
+            
+            # 确保输出目录存在
+            os.makedirs(os.path.dirname(rules_file), exist_ok=True)
+            
+            try:
+                # Try to generate AI rules if API key is available
+                ai_rules = self._generate_ai_rules(project_info)
+            except Exception as e:
+                print(f"⚠️ Could not generate AI rules: {e}")
+                # Generate basic rules without AI
+                ai_rules = self._get_default_rules()
             
             # Generate project description
             description = self._generate_project_description(project_structure)
             project_info['description'] = description
             
-            # Create rules file path
-            rules_file = os.path.join(self.project_path, '.cursorrules')
-            
-            if format.lower() == 'markdown':
-                content = self._generate_markdown_rules(project_info, ai_rules)
-                with open(rules_file, 'w', encoding='utf-8') as f:
-                    f.write(content)
-            else:  # JSON format
-                rules = {
-                    "version": "1.0",
-                    "last_updated": self._get_timestamp(),
-                    "project": {
-                        **project_info,
-                        "description": description
-                    },
-                    "ai_behavior": ai_rules['ai_behavior']
-                }
-                with open(rules_file, 'w', encoding='utf-8') as f:
-                    json.dump(rules, f, indent=2)
+            # Generate markdown content
+            content = self._generate_markdown_rules(project_info, ai_rules)
+            with open(rules_file, 'w', encoding='utf-8') as f:
+                f.write(content)
             
             return rules_file
                 
         except Exception as e:
             print(f"❌ Failed to generate rules: {e}")
-            raise 
+            raise
 
     def _analyze_python_file(self, content: str, rel_path: str, structure: Dict[str, Any]):
         """Analyze Python file content."""
