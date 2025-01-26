@@ -1,8 +1,8 @@
-## [All rights belong to RenjiYuusei please do not steal the source code or modify the source code without the author's consent. Please respect the author](https://github.com/RenjiYuusei/CursorFocus)
+## [All rights belong to RenjiYuusei please do not steal the source code or modify the source code without the author's consent. Please respect the author](https://github.com/RenjiYuusei/CursorMate)
 
-## CursorFocus
+## CursorMate
 
-A lightweight tool that maintains a focused view of your project structure and environment. CursorFocus automatically tracks your project files, functions, and environment variables, updating every 60 seconds to keep you informed of changes.
+A lightweight tool that maintains a focused view of your project structure and environment. CursorMate automatically tracks your project files, functions, and environment variables, updating every 60 seconds to keep you informed of changes.
 
 Check out our [SHOWCASE.md](SHOWCASE.md) for detailed examples and real-world use cases!
 
@@ -12,18 +12,20 @@ Join our Discord server to discuss features, ask questions: [Discord](https://di
 
 ## Features
 
-- 🤖 AI-powered rules generation
+- 🧠 Personal-specific context and query
+- 🤖 AI-powered **personalized context** generation
 - 🔄 Real-time project structure tracking
-- 📝 Automatic file and function documentation
+- 📝 Automatic contextual documentation
 - 🌳 Hierarchical directory visualization
-- 📏 File length standards and alerts
-- 🎯 Project-specific information detection
-- 🎛️ Automatic .cursorrules generation and project adaptation
+- 🎯 Project-specific adaptation
+- 🔍 Thinking evolution tracking
 
 ## Installation
 ```
-irm https://raw.githubusercontent.com/RenjiYuusei/CursorFocus/refs/heads/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/RenjiYuusei/CursorMate/refs/heads/main/install.ps1 | iex
 ```
+
+这条命令通过PowerShell直接从GitHub下载并立即执行CursorMate的安装脚本（`irm`下载脚本，`iex`执行内容），实现一键安装，但需注意直接运行远程代码的安全风险。
 
 ## Requirements
 
@@ -32,7 +34,7 @@ irm https://raw.githubusercontent.com/RenjiYuusei/CursorFocus/refs/heads/main/in
 
 ## API Key Setup
 
-Before running CursorFocus, you need to set up your Gemini API key:
+Before running CursorMate, you need to set up your Gemini API key:
 
 1. Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
@@ -64,7 +66,7 @@ Before running CursorFocus, you need to set up your Gemini API key:
 
 ## Multi-Project Support
 
-CursorFocus can monitor multiple projects simultaneously. There are two ways to set this up:
+CursorMate can monitor multiple projects simultaneously. There are two ways to set this up:
 
 
 ### Manual Setup
@@ -74,7 +76,7 @@ If you prefer to set up manually:
 1. Install dependencies (Python 3.10+ required):
 
    ```bash
-   cd CursorFocus
+   cd CursorMate
    pip install -r requirements.txt
    ```
 
@@ -90,44 +92,24 @@ If you prefer to set up manually:
 
 ## Generated Files
 
-CursorFocus automatically generates and maintains two key files:
+CursorMate automatically generates and maintains three key files:
 
 1. **Focus.md**: Project documentation and analysis
    - Project overview and structure
    - File descriptions and metrics
    - Function documentation
-2. **.cursorrules**: Project-specific Cursor settings
-   - Support format: JSON, Markdown
+2. **Rules.md**: Project-specific Cursor settings
+   - 是 .cursorrules 文件的候选内容
    - Automatically generated based on project type
    - Customized for your project's structure
    - Updates as your project evolves
+3. **Me.md**: Personal information, 基本框架是:
+   - 个人简历信息
+   - 12个正在做的项目信息
+   - 个人的认知内核
 
-## Output
+These three files are generated in the `.me` directory by default.
 
-CursorFocus generates a `Focus.md` file in your project root with:
-
-1. Project Overview
-
-   - Project name and description
-   - Key features and version
-   - Project type detection
-
-2. Project Structure
-
-   - Directory hierarchy
-   - File descriptions
-   - Function listings with detailed descriptions
-   - File type detection
-   - File length alerts based on language standards
-
-3. Code Analysis
-   - Key function identification
-   - Detailed function descriptions
-   - File length standards compliance
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or create issues for bugs and feature requests.
 
 ## License
 
