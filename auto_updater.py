@@ -21,6 +21,17 @@ class AutoUpdater:
     def __init__(self, repo_url: str = "https://github.com/RenjiYuusei/CursorFocus"):
         self.repo_url = repo_url
         self.api_url = repo_url.replace("github.com", "api.github.com/repos")
+        self.current_version = self._get_current_version()
+        self.latest_version = None
+        self.update_available = False
+
+    def _get_current_version(self):
+        """获取当前版本号"""
+        try:
+            with open('.current_commit', 'r') as f:
+                return f.read().strip()
+        except FileNotFoundError:
+            return None
 
     def check_for_updates(self) -> Optional[Dict[str, Any]]:
         """Check update from latest update"""
@@ -69,6 +80,11 @@ class AutoUpdater:
             return ''
         except:
             return ''
+
+    def should_update(self):
+        """是否应该更新"""
+        # 暂时禁用自动更新
+        return False
 
     def update(self, update_info: Dict[str, Any]) -> bool:
         """Update from latest commit."""
