@@ -1,14 +1,9 @@
-## [All rights belong to RenjiYuusei please do not steal the source code or modify the source code without the author's consent. Please respect the author](https://github.com/RenjiYuusei/CursorMate)
 
-## CursorMate
+# CursorMate
 
 A lightweight tool that maintains a focused view of your project structure and environment. CursorMate automatically tracks your project files, functions, and environment variables, updating every 60 seconds to keep you informed of changes.
 
-Check out our [SHOWCASE.md](SHOWCASE.md) for detailed examples and real-world use cases!
 
-## Discord
-
-Join our Discord server to discuss features, ask questions: [Discord](https://discord.gg/N6FBdRZ8sw)
 
 ## Features
 
@@ -22,7 +17,7 @@ Join our Discord server to discuss features, ask questions: [Discord](https://di
 
 ## Installation
 ```
-irm https://raw.githubusercontent.com/RenjiYuusei/CursorMate/refs/heads/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/1587causalai/CursorMate/refs/heads/me/install.ps1 | iex
 ```
 
 这条命令通过PowerShell直接从GitHub下载并立即执行CursorMate的安装脚本（`irm`下载脚本，`iex`执行内容），实现一键安装，但需注意直接运行远程代码的安全风险。

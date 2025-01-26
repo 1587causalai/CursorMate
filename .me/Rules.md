@@ -2,126 +2,121 @@
 
 ## Project Information
 - **Version**: 1.0.0
-- **Last Updated**: January 26, 2025 at 08:59 PM
-- **Name**: CursorFocus
+- **Last Updated**: January 26, 2025 at 11:48 PM
+- **Name**: CursorMate
 - **Language**: markdown
 - **Framework**: none
 - **Type**: application
 
 ## Project Description
-```
-{
-  "project_description": "This project is a code analysis and documentation tool designed to provide developers with insights into their projects. It automatically generates project documentation, coding style rules, and personal activity metrics, enhancing understanding and consistency. The tool monitors projects for changes, utilizes AI to suggest coding guidelines, and provides a structured view of codebases, targeting developers seeking to improve their workflow and project quality."
-}
-```
+This project is a code analysis and automation tool designed to enhance the development workflow by generating project-specific documentation, coding rules, and personal activity metrics. It leverages AI to suggest coding standards and best practices, while also providing real-time monitoring and automatic updates to keep projects synchronized with established guidelines; the tool is intended for developers who aim to maintain consistency and quality across their projects.
 
 ## AI Behavior Rules
 
 ### Code Generation Style
 #### Preferred Patterns
-- Use 4 spaces for indentation.
-- Use snake_case for variables and function names.
-- Use CamelCase for class names.
-- Use descriptive variable and function names.
-- Keep lines under 120 characters.
+- Use snake_case for variables and functions.
+- Use PascalCase for classes.
+- Use docstrings to document functions and classes.
+- Use type hints for function arguments and return values.
+- Use consistent indentation (4 spaces).
+- Keep lines under 120 characters long when possible.
 - Use f-strings for string formatting.
-- Use type hints for function signatures and variables.
-- Use docstrings for functions and classes.
-- Use consistent import statements, grouped by standard library, third-party, and local modules.
-- Use clear and concise comments where necessary.
-- Use blank lines to separate logical blocks of code within functions.
-- Use consistent naming patterns for similar concepts.
+- Use clear and concise variable names.
+- Use imports at the top of the file, grouped by standard library, third-party, and local modules.
+- Use consistent spacing around operators and commas.
+- Use list comprehensions or generator expressions for simple iterations when appropriate.
 
 #### Patterns to Avoid
-- Use tabs for indentation.
-- Use inconsistent indentation.
-- Use abbreviations or cryptic names.
-- Exceeding line length limits.
-- Inconsistent string formatting.
-- Lack of type hints.
-- Missing docstrings.
-- Unorganized import statements.
-- Unnecessary comments.
-- Lack of whitespace between logical code blocks.
-- Inconsistent naming.
+- Camel case for variables or functions.
+- Inconsistent indentation.
+- Long lines that wrap around.
+- Magic numbers or hardcoded values.
+- Inconsistent spacing.
+- Unnecessary blank lines.
+- Using overly complex code constructs where simpler ones suffice.
 
 ### Error Handling
 #### Preferred Patterns
-- Use try-except blocks for error handling.
-- Log exceptions using the logging module.
-- Return None or False from functions upon failure instead of raising exceptions.
-- Catch specific exceptions where possible, instead of a general 'Exception'
-- Provide clear error messages in log statements.
+- Use try-except blocks to handle potential errors.
+- Log errors using the logging module.
+- Return None or False to indicate failure in functions or methods where appropriate.
+- Provide informative error messages in log statements.
+- Catch specific exceptions where possible rather than generic Exception.
+- Use a basic error handling approach without complex custom error classes or decorators.
 
 #### Patterns to Avoid
-- Using bare except statements
-- Ignoring exceptions silently.
-- Printing error messages to console instead of logging.
-- Raising generic exceptions.
-- Failing without returning information about failure.
+- Ignoring errors without logging or handling them.
+- Using bare except blocks.
+- Raising exceptions without context.
+- Using print statements for error messages (use logging instead).
+- Complex error handling patterns.
 
 ### Performance
 #### Preferred Patterns
 - Use sets for membership testing.
-- Use list comprehensions where appropriate.
-- Use `os.path.join` for creating file paths.
-- Avoid unnecessary file reads and writes.
-- Use `os.scandir` over `os.listdir` for directory traversal where possible.
-- Use `set` for faster lookups when checking for a list of items.
+- Use list comprehensions or generator expressions instead of loops when possible.
+- Optimize regex patterns for efficiency.
+- Avoid unnecessary file reads or writes.
+- Use efficient data structures for lookups and storage.
+- Use cached results when possible.
+- Use os.scandir for directory traversal.
+- Use shutil.copy2 for copying files and directories.
+- Use temporary files and directories for operations.
 
 #### Patterns to Avoid
-- Unnecessary loops.
-- Inefficient string manipulations.
-- Hardcoding paths.
-- Repeatedly reading the same files.
-- Using `os.listdir` when `os.scandir` is more efficient.
-- Using lists for membership checks when sets are more performant.
+- Unnecessary loops or iterations.
+- Repeatedly opening and closing files.
+- Inefficient regex patterns.
+- Performing computationally expensive operations in loops.
+- Excessive memory consumption.
 
 ### Module Organization
 #### Structure
-- The project is structured into multiple Python modules, each with specific responsibilities.
-- The core logic is separated from configuration and utility functions.
-- Modules are organized based on their functionality, such as auto-updating, analysis, rule generation, content generation, and project detection.
-- Configuration settings are loaded from a dedicated `config.py` module and a `config.json` file.
-- The `setup.py` script is used for project configuration and management.
-- There is a consistent structure for main program execution with `focus.py` and `setup.py`.
+- The project is organized into several modules, each with a specific responsibility.
+- The core modules are: auto_updater.py, analyzers.py, rules_generator.py, project_detector.py, config.py, me_generator.py, rules_watcher.py, rules_analyzer.py, setup.py, content_generator.py, and focus.py.
+- Modules are located in the root directory of the project.
+- There are no sub-packages.
 
 #### Dependencies
-- `auto_updater.py` depends on `os`, `requests`, `json`, `shutil`, `datetime`, `logging`, `typing`, `tempfile`, `zipfile`.
-- `analyzers.py` depends on `os`, `re`, `config`, `logging`.
-- `rules_generator.py` depends on `os`, `json`, `typing`, `datetime`, `google.generativeai`, `re`, `rules_analyzer`, `dotenv`, `config`.
-- `project_detector.py` depends on `os`, `json`, `re`, `config`, `time`, `typing`.
-- `config.py` depends on `os`, `json`.
-- `me_generator.py` depends on `os`, `datetime`, `typing`, `content_generator`, `config`.
-- `rules_watcher.py` depends on `os`, `time`, `typing`, `watchdog`, `rules_generator`, `project_detector`, `config`.
-- `rules_analyzer.py` depends on `os`, `json`, `typing`.
-- `setup.py` depends on `os`, `json`, `argparse`, `logging`, `project_detector`.
-- `content_generator.py` depends on `os`, `datetime`, `analyzers`, `project_detector`, `config`, `re`, `logging`, `typing`.
-- `focus.py` depends on `os`, `time`, `datetime`, `typing`, `config`, `content_generator`, `rules_analyzer`, `rules_generator`, `rules_watcher`, `logging`, `auto_updater`, `me_generator`.
+- auto_updater.py: os, requests, json, shutil, datetime, logging, typing, tempfile, zipfile.
+- analyzers.py: os, re, config, logging.
+- rules_generator.py: os, json, typing, datetime, google.generativeai, re, rules_analyzer, dotenv, config.
+- project_detector.py: os, json, re, config, time, typing.
+- config.py: os, json.
+- me_generator.py: os, datetime, typing, content_generator, config.
+- rules_watcher.py: os, time, typing, watchdog, rules_generator, project_detector, config.
+- rules_analyzer.py: os, json, typing.
+- setup.py: os, json, argparse, logging, project_detector.
+- content_generator.py: os, datetime, analyzers, project_detector, config, re, logging, typing.
+- focus.py: os, time, datetime, typing, config, content_generator, rules_analyzer, rules_generator, rules_watcher, logging, auto_updater, me_generator.
 
 #### Module Responsibilities
-- **auto_updater.py**: Handles automatic updates of the application from a GitHub repository.
-- **analyzers.py**: Analyzes code files to detect functions and determine if a file should be ignored.
-- **rules_generator.py**: Generates project rules using Gemini AI based on project analysis.
-- **project_detector.py**: Detects the type of project based on file system indicators.
-- **config.py**: Loads and manages project configuration settings.
-- **me_generator.py**: Generates a 'Me.md' file containing personal activity and project metrics.
-- **rules_watcher.py**: Monitors project files for changes and triggers updates to the rules file.
-- **rules_analyzer.py**: Analyzes the project to provide information for rule generation.
-- **setup.py**: Handles project configuration, adding, removing, and listing projects, and scanning for new projects.
-- **content_generator.py**: Generates the 'Focus.md' file containing project structure and function information.
-- **focus.py**: The main entry point of the application, managing project monitoring, update checks, and document generation.
+- **auto_updater.py**: Handles auto-updating the application from a GitHub repository.
+- **analyzers.py**: Analyzes file content for functions, descriptions, and other code features.
+- **rules_generator.py**: Generates rules for the Cursor IDE using Gemini AI based on project analysis.
+- **project_detector.py**: Detects the type of project based on file patterns and indicators.
+- **config.py**: Loads and manages configuration settings for the application.
+- **me_generator.py**: Generates personal activity metrics and recommendations.
+- **rules_watcher.py**: Monitors file changes and triggers rule updates.
+- **rules_analyzer.py**: Analyzes project metadata for rule generation.
+- **setup.py**: Manages project configuration, adding, removing, and listing projects.
+- **content_generator.py**: Generates content for the Focus.md file, including directory structure and file information.
+- **focus.py**: The main entry point for the application, coordinates project monitoring, analysis, and documentation generation.
 
 #### Rules
-- Each module has a clear and specific purpose.
-- Modules communicate through function calls and data passing.
-- Configuration is centralized in the `config.py` module and loaded at startup.
-- Error handling is consistent across modules using `try-except` blocks and logging.
-- Modules use descriptive names to indicate their purpose.
+- Each module should have a clear and defined responsibility.
+- Modules should have minimal dependencies with each other.
+- Configuration should be managed in a central config.py file.
+- Project detection should be separated from other analysis logic.
+- Rules generation should be handled by a dedicated module.
+- File monitoring and automatic updates should be handled by dedicated modules.
+- Focus.md, Me.md and Rules.md generation should be handled by dedicated modules.
 
 #### Naming Conventions
-- **modules**: Descriptive names using snake_case (e.g., `auto_updater.py`, `rules_generator.py`).
-- **classes**: Descriptive names using CamelCase (e.g., `AutoUpdater`, `RulesGenerator`).
-- **functions**: Descriptive names using snake_case (e.g., `check_for_updates`, `analyze_file_content`).
-- **variables**: Descriptive names using snake_case (e.g., `repo_url`, `project_path`).
-- **constants**: Descriptive names using UPPER_SNAKE_CASE (e.g. `BINARY_EXTENSIONS`).
+- **variables**: Use snake_case (e.g., project_path, file_name).
+- **functions**: Use snake_case (e.g., analyze_file_content, generate_focus_content).
+- **classes**: Use PascalCase (e.g., AutoUpdater, RulesGenerator, ProjectMetrics).
+- **constants**: Use UPPER_SNAKE_CASE (e.g., PROJECT_TYPES, CACHE_EXPIRATION).
+- **files**: Use snake_case for file names (e.g., auto_updater.py, rules_generator.py).
+- **method**: Use snake_case (e.g., _get_timestamp, _analyze_project_structure).
