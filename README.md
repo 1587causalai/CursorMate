@@ -2,8 +2,6 @@
 
 A lightweight tool that maintains a focused view of your project structure and environment. CursorMate automatically tracks your project files, functions, and environment variables, updating every 60 seconds to keep you informed of changes. Detailed information on [link](https://1587causalai.github.io/CursorMate/#/)
 
-
-
 ## Features
 
 - 🧠 Personal-specific context and query
@@ -16,7 +14,7 @@ A lightweight tool that maintains a focused view of your project structure and e
 
 ## Installation
 ```
-irm https://raw.githubusercontent.com/RenjiYuusei/CursorMate/refs/heads/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/1587causalai/CursorMate/refs/heads/me/install.ps1 | iex
 ```
 
 这条命令通过PowerShell直接从GitHub下载并立即执行CursorMate的安装脚本（`irm`下载脚本，`iex`执行内容），实现一键安装，但需注意直接运行远程代码的安全风险。

@@ -237,7 +237,7 @@ def setup_cursor_focus(project_path, project_name=None):
     功能：
     1. 生成 Focus.md 文档
     2. 生成 Me.md 文档
-    3. 生成 .cursorrules 文件
+    3. 生成 Rules.md 文件 (作为 .cursorrules 的候选内容)
     """
     try:
         # 加载配置
@@ -275,9 +275,9 @@ def setup_cursor_focus(project_path, project_name=None):
             f.write(me_content)
         print(f"✓ Generated {os.path.basename(me_file)}")
 
-        # 生成 .cursorrules
+        # 生成 Rules.md
         try:
-            rules_file = os.path.join(project_path, project_config.get('file_paths', {}).get('rules', '.me/.cursorrules'))
+            rules_file = os.path.join(project_path, project_config.get('file_paths', {}).get('rules', '.me/Rules.md'))
             os.makedirs(os.path.dirname(rules_file), exist_ok=True)
             
             # 分析项目并生成规则
