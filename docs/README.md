@@ -2,6 +2,9 @@
 
 > 打造真正懂你的智能助手 - 超越项目监控，走向个性化协作
 
+我们的阶段性产品是一个 MCP server：https://www.npmjs.com/package/@1587causalai/me-server
+
+
 ## 愿景
 
 CursorMate 致力于创建一个能真正理解你的 AI 协作环境。我们相信：
@@ -10,6 +13,15 @@ CursorMate 致力于创建一个能真正理解你的 AI 协作环境。我们�
 - 🌱 个性化信息是最宝贵的上下文
 
 个人信息融入的三个维度: 1) 个人简历; 2) 12个正在进行的项目; 3) 自己的认知内核.
+
+认知内核包括:
+- 原始世界信念
+- 我的专业知识背后的关键理念
+  - all models are wrong, but some are useful
+  - 统计思维
+  - 系统思维
+- DiscoSCM 的认知内核
+
 
 ## 核心功能
 
@@ -42,6 +54,11 @@ CursorMate 不仅仅是一个项目监控工具，它是：
 
 CursorMate 不仅致力于优化上下文提供，更进一步帮助你提出更好的问题，实现真正的个性化协作。
 
+
+## 竞品分析
+
+
+Mem0 调研: https://swze06osuex.feishu.cn/docx/UBN4dTLYuomE5lxexQkcQGiEn5c
 
 
 ## 灵魂拷问
