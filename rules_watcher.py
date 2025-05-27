@@ -1,21 +1,51 @@
 import os
 import time
-from typing import Dict, Any
+import logging
+from typing import Dict, Any, List, Optional, Set
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from rules_generator import RulesGenerator
+from rules_analyzer import RulesAnalyzer
 from project_detector import detect_project_type
-from config import get_default_config
+from config import load_config, IGNORED_NAMES
+
+# Load configuration at module level
+_config = load_config()
 
 class RulesWatcher(FileSystemEventHandler):
     def __init__(self, project_path: str, project_id: str):
         self.project_path = project_path
         self.project_id = project_id
         self.rules_generator = RulesGenerator(project_path)
+        self.rules_analyzer = RulesAnalyzer(project_path)
         self.last_update = 0
-        self.update_delay = 5  # Seconds to wait before updating to avoid multiple updates
+        self.update_delay = _config.get('rules_update_delay', 5)  # Seconds to wait before updating to avoid multiple updates
         self.auto_update = False  # Disable auto-update by default
-        self.config = get_default_config()  # 加载配置
+        self.logger = logging.getLogger(__name__)
+        
+        # Trigger files that should cause rules update
+        self.trigger_files = {
+            'Focus.md',
+            'package.json',
+            'requirements.txt',
+            'CMakeLists.txt',
+            'composer.json',
+            'build.gradle',
+            'pom.xml',
+            'Cargo.toml',
+            'pubspec.yaml',
+            'setup.py',
+            'tsconfig.json',
+            'pyproject.toml'
+        }
+        
+        # File extensions that should trigger an update
+        self.trigger_extensions = {
+            '.csproj',
+            '.vcxproj',
+            '.sln',
+            '.gemspec'
+        }
 
     def on_modified(self, event):
         if event.is_directory or not self.auto_update:  # Skip if auto-update is disabled
@@ -37,22 +67,25 @@ class RulesWatcher(FileSystemEventHandler):
         if not self.auto_update:  # Skip if auto-update is disabled
             return False
             
+        # Skip files in ignored directories
+        for ignored in IGNORED_NAMES:
+            if f"/{ignored}/" in file_path or f"\\{ignored}\\" in file_path:
+                return False
+                
         filename = os.path.basename(file_path)
-        focus_file = os.path.basename(self.config.get('file_paths', {}).get('focus', 'Focus.md'))
         
-        # List of files that should trigger an update
-        trigger_files = [
-            focus_file,  # 使用配置中的Focus.md路径
-            'package.json',
-            'requirements.txt',
-            'CMakeLists.txt',
-            '.csproj',
-            'composer.json',
-            'build.gradle',
-            'pom.xml'
-        ]
-        
-        return filename in trigger_files or any(file_path.endswith(ext) for ext in ['.csproj'])
+        # Check if filename is in trigger files list
+        if filename in self.trigger_files:
+            self.logger.debug(f"Trigger file modified: {filename}")
+            return True
+            
+        # Check if file extension should trigger an update
+        file_ext = os.path.splitext(filename)[1].lower()
+        if file_ext in self.trigger_extensions:
+            self.logger.debug(f"Trigger extension modified: {file_ext}")
+            return True
+            
+        return False
 
     def _update_rules(self):
         """Update the .cursorrules file."""
@@ -63,84 +96,100 @@ class RulesWatcher(FileSystemEventHandler):
             # Re-detect project type
             project_info = detect_project_type(self.project_path)
             
-            # 确保输出目录存在
-            output_dir = os.path.join(self.project_path, self.config.get('output_directory', '.me'))
-            os.makedirs(output_dir, exist_ok=True)
+            # If project_info is missing or incomplete, enhance it with analyzer
+            if not project_info.get('language') or project_info.get('language') == 'unknown':
+                try:
+                    analyzed_info = self.rules_analyzer.analyze_project_for_rules()
+                    # Merge info, but keep detect_project_type results as primary
+                    for key, value in analyzed_info.items():
+                        if not project_info.get(key) or project_info[key] == 'unknown' or project_info[key] == 'none':
+                            project_info[key] = value
+                except Exception as e:
+                    self.logger.warning(f"Error enhancing project info with analyzer: {e}")
             
             # Generate new rules
-            rules_file = os.path.join(self.project_path, self.config.get('file_paths', {}).get('rules', '.me/Rules.md'))
-            os.makedirs(os.path.dirname(rules_file), exist_ok=True)
-            self.rules_generator.generate_rules_file(project_info, rules_file)
-            print(f"Updated {os.path.basename(rules_file)} for project {self.project_id} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            rules_file = self.rules_generator.generate_rules_file(project_info)
+            self.logger.info(f"Updated .cursorrules for project {self.project_id} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            return rules_file
         except Exception as e:
-            print(f"Error updating rules file for project {self.project_id}: {e}")
+            self.logger.error(f"Error updating .cursorrules for project {self.project_id}: {e}", exc_info=True)
+            return None
 
     def set_auto_update(self, enabled: bool):
         """Enable or disable auto-update of .cursorrules."""
         self.auto_update = enabled
         status = "enabled" if enabled else "disabled"
-        print(f"Auto-update of .cursorrules is now {status} for project {self.project_id}")
+        self.logger.info(f"Auto-update of .cursorrules is now {status} for project {self.project_id}")
 
 class ProjectWatcherManager:
-    def __init__(self, project_path: str = None, config: Dict = None):
-        self.observers = {}
-        self.watchers = {}
-        if project_path:
-            self.add_project(project_path)
-            
+    def __init__(self):
+        self.observers: dict[str, Observer] = {} # type: ignore
+        self.watchers: dict[str, RulesWatcher] = {}
+        self.logger = logging.getLogger(__name__)
+
     def add_project(self, project_path: str, project_id: str = None) -> str:
-        """
-        添加一个项目到监控列表
+        """Add a new project to watch.
         
-        参数：
-        - project_path: 项目路径
-        - project_id: 项目ID（可选，默认使用路径的base name）
-        
-        返回：
-        - project_id: 项目ID
-        """
-        project_path = os.path.abspath(project_path)
-        if not project_id:
-            project_id = os.path.basename(project_path)
+        Args:
+            project_path: Path to the project directory
+            project_id: Optional identifier for the project (defaults to absolute path)
             
+        Returns:
+            The project_id used to identify this project
+            
+        Raises:
+            ValueError: If the project path does not exist
+        """
+        if not os.path.exists(project_path):
+            self.logger.error(f"Project path does not exist: {project_path}")
+            raise ValueError(f"Project path does not exist: {project_path}")
+            
+        project_id = project_id or os.path.abspath(project_path)
+        
         if project_id in self.observers:
-            print(f"Project {project_id} is already being watched")
+            self.logger.info(f"Project {project_id} is already being watched")
             return project_id
             
+        event_handler = RulesWatcher(project_path, project_id)
+        observer = Observer()
+        observer.schedule(event_handler, project_path, recursive=True)
+        
         try:
-            # 创建观察者和处理器
-            observer = Observer()
-            watcher = RulesWatcher(project_path, project_id)
-            
-            # 启动观察者
-            observer.schedule(watcher, project_path, recursive=True)
             observer.start()
-            
-            # 保存观察者和处理器的引用
             self.observers[project_id] = observer
-            self.watchers[project_id] = watcher
-            
-            print(f"Started watching project {project_id}")
+            self.watchers[project_id] = event_handler
+            self.logger.info(f"Started watching project {project_id}")
             return project_id
-            
         except Exception as e:
-            print(f"Error watching project {project_id}: {e}")
+            self.logger.error(f"Failed to start observer for project {project_id}: {e}", exc_info=True)
             raise
 
-    def remove_project(self, project_id: str):
-        """Stop watching a project."""
+    def remove_project(self, project_id: str) -> bool:
+        """Stop watching a project.
+        
+        Args:
+            project_id: The identifier of the project to stop watching
+            
+        Returns:
+            True if project was removed, False if it wasn't being watched
+        """
         if project_id not in self.observers:
-            print(f"Project {project_id} is not being watched")
-            return
+            self.logger.warning(f"Project {project_id} is not being watched")
+            return False
             
         observer = self.observers[project_id]
-        observer.stop()
-        observer.join()
-        
-        del self.observers[project_id]
-        del self.watchers[project_id]
-        
-        print(f"Stopped watching project {project_id}")
+        try:
+            observer.stop()
+            observer.join()
+            
+            del self.observers[project_id]
+            del self.watchers[project_id]
+            
+            self.logger.info(f"Stopped watching project {project_id}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Error stopping observer for project {project_id}: {e}", exc_info=True)
+            return False
 
     def list_projects(self) -> Dict[str, str]:
         """Return a dictionary of watched projects and their paths."""
@@ -150,30 +199,67 @@ class ProjectWatcherManager:
         """Stop watching all projects."""
         for project_id in list(self.observers.keys()):
             self.remove_project(project_id)
+        self.logger.info("Stopped watching all projects")
 
-    def set_auto_update(self, project_id: str, enabled: bool):
-        """Enable or disable auto-update for a specific project."""
+    def set_auto_update(self, project_id: str, enabled: bool) -> bool:
+        """Enable or disable auto-update for a specific project.
+        
+        Args:
+            project_id: The identifier of the project
+            enabled: Whether to enable or disable auto-update
+            
+        Returns:
+            True if successful, False if project is not being watched
+        """
         if project_id in self.watchers:
             self.watchers[project_id].set_auto_update(enabled)
+            return True
         else:
-            print(f"Project {project_id} is not being watched")
+            self.logger.warning(f"Project {project_id} is not being watched")
+            return False
+    
+    def update_project_rules(self, project_id: str) -> bool:
+        """Manually trigger rules update for a specific project.
+        
+        Args:
+            project_id: The identifier of the project
+            
+        Returns:
+            True if successful, False if project is not being watched
+        """
+        if project_id in self.watchers:
+            try:
+                self.watchers[project_id]._update_rules()
+                return True
+            except Exception as e:
+                self.logger.error(f"Error updating rules for project {project_id}: {e}", exc_info=True)
+                return False
+        else:
+            self.logger.warning(f"Project {project_id} is not being watched")
+            return False
 
-def start_watching(project_paths: str | list[str]):
+def start_watching(project_paths: str | List[str], auto_update: bool = False) -> ProjectWatcherManager:
     """Start watching one or multiple project directories for changes.
     
     Args:
-        project_paths: A single project path or list of project paths to watch
+        project_paths: A string or list of paths to project directories
+        auto_update: Whether to enable auto-update for the projects
+        
+    Returns:
+        The ProjectWatcherManager instance
     """
     manager = ProjectWatcherManager()
+    logger = logging.getLogger(__name__)
     
     if isinstance(project_paths, str):
         project_paths = [project_paths]
         
     for path in project_paths:
-        manager.add_project(path)
+        try:
+            project_id = manager.add_project(path)
+            if auto_update:
+                manager.set_auto_update(project_id, True)
+        except Exception as e:
+            logger.error(f"Failed to set up watcher for {path}: {e}", exc_info=True)
     
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        manager.stop_all() 
+    return manager 
