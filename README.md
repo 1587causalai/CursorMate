@@ -2,7 +2,7 @@
 
 CursorFocus is a tool that automatically analyzes software codebases to generate dynamic context files (`Focus.md`, `.cursorrules`) specifically designed to enhance the code comprehension and code generation capabilities of the Cursor AI IDE.
 
-> 真正的灵魂拷问是我为什么不直接让它生成呢？意思是说我在这个开发环境中使用一个提示词直接让他生成这两个文件就行了？
+> 真正的灵魂拷问是我为什么不直接让它生成呢？意思是说我在这个开发环境中使用一个提示词直接让他生成这两个文件就行了，为什么还要费劲巴拉的写这些代码呢？
 
 ## 项目结构
 - `test_api.py` - 测试 Gemini API

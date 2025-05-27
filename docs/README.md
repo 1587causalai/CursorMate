@@ -4,6 +4,19 @@
 
 我们的阶段性产品是一个 MCP server：https://www.npmjs.com/package/@1587causalai/me-server
 
+### 项目的演进与新方向
+
+`CursorMate` 最初源于对 `CursorFocus` ([https://github.com/RenjiYuusei/CursorFocus](https://github.com/RenjiYuusei/CursorFocus)) 项目的探索。`CursorFocus` 旨在通过生成项目特定的上下文文件（如 `.cursorrules` 和 `Focus.md`）来增强 AI 的代码理解能力。
+
+然而，在深入思考如何才能最大化 AI 对开发者的辅助价值后，我们认为 `CursorMate` 的使命需要超越 `CursorFocus` 原有的范畴。虽然 `.cursorrules` 等具体概念仍有其参考价值，但我们判断，仅仅停留在项目级上下文优化，对于实现真正"懂你"的 AI 助手而言，其"[[cursorrules_vs_focus]] 存在意义并不大！"——这正是驱动我们进行战略调整的核心洞察。
+
+**`CursorMate` 的核心思路已转向构建一个基于 MCP (My Context Provider) server 架构的个性化协作平台。** 我们相信，通过深度整合开发者的个人履历、当前负责的多个项目详情、乃至个人的认知内核与思考模式，才能打造出真正贴合个体需求的智能助手。当前我们的阶段性产品（即上方链接的 MCP server npm 包）正是这一新方向的初步实践。
+
+这代表着一个重要的战略转向：
+- 原先基于 `CursorFocus` fork 的代码库将不再作为主要开发阵地进行更新。
+- 未来的所有努力将聚焦于 MCP server 的研发与完善，这才是 `CursorMate` 实现其宏大愿景的技术路线。
+
+我们致力于将 `CursorMate` 从一个项目上下文工具，进化为一个能够深度理解并赋能每一位开发者的个性化智能伙伴。
 
 ## 愿景
 
