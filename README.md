@@ -100,6 +100,26 @@ Setup a project with the given path
 
 ```
 
+### Generated Files
+
+CursorMate automatically generates and maintains three key files:
+
+1. **Focus.md**: Project documentation and analysis
+   - Project overview and structure
+   - File descriptions and metrics
+   - Function documentation
+2. **Rules.md**: Project-specific Cursor settings
+   - 是 .cursorrules 文件的候选内容
+   - Automatically generated based on project type
+   - Customized for your project's structure
+   - Updates as your project evolves
+3. **Me.md**: Personal information, 基本框架是:
+   - 个人简历信息
+   - 12个正在做的项目信息
+   - 个人的认知内核
+
+These three files are generated in the `.me` directory by default.
+
 ## Project structure
 
 - `cli.py` - Main command line interface
