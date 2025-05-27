@@ -2,6 +2,30 @@
 
 CursorFocus is a tool that automatically analyzes software codebases to generate dynamic context files (`Focus.md`, `.cursorrules`) specifically designed to enhance the code comprehension and code generation capabilities of the Cursor AI IDE.
 
+> 真正的灵魂拷问是我为什么不直接让它生成呢？意思是说我在这个开发环境中使用一个提示词直接让他生成这两个文件就行了？
+
+## 项目结构
+- `test_api.py` - 测试 Gemini API
+- `patterns_analyzer.py` - 分析代码模式
+- `me_generator.py` - 生成 Me.md 文件
+- `rules_watcher.py` - 监控规则文件
+- `setup.py` - 设置项目
+- `config.py` - 配置管理
+- `focus.py` - 创建和监控上下文文件
+- `analyzers.py` - 分析文件内容
+- `rules_generator.py` - 创建 .cursorrules 文件
+- `content_generator.py` - 创建 Focus.md 文件
+- `project_detector.py` - 检测项目类型
+- `cli.py` - 主命令行界面
+- `ui.py` - 用户界面组件
+- `core.py` - 核心应用功能
+- `config.py` - 配置管理
+- `focus.py` - 创建和监控上下文文件
+- `analyzers.py` - 分析文件内容
+- `rules_generator.py` - 创建 .cursorrules 文件
+- `content_generator.py` - 创建 Focus.md 文件
+- `project_detector.py` - 检测项目类型
+
 ## Main Features
 
 - **Automatic Analysis**: Identify and analyze software projects
