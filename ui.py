@@ -17,7 +17,7 @@ from rich.style import Style as RichStyle
 from rich.align import Align
 from rich.columns import Columns
 from rich import box
-import keyboard
+# import keyboard  # Commented out - causes segmentation fault on macOS
 
 # Initialize colorama
 init(autoreset=True)
